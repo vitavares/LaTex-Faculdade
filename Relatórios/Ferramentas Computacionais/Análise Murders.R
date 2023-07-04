@@ -1,9 +1,5 @@
 rm(list = ls())
 
-library(ggplot2)
-library(scales)
-library(gridExtra)
-
 library(dslabs)
 data("murders")
 ?murders
@@ -91,30 +87,17 @@ abline(lm(populacao~assassinatos))
 cor(assassinatos, populacao, method = 'pearson') # Correlação direta forte
 
 
-# Gráfico de dispersão e intervalo de confiança.
+# Gráfico de dispersão e coeficiente de correlação
+library(ggplot2)
 plot(assassinatos, populacao, main = 'Gráfico de disperção: Assassinatos X População',
      xlab = 'Assassinatos', ylab = 'População', pch = 1)
 abline(lm(populacao~assassinatos))
 cor(assassinatos, populacao, method = 'pearson') # Correlação direta forte
 
-options(scipen = 999, digits = 4) #tira notação cientifica
-#options(scipen = 0, digits = 7) voltar ao normal
-
-##Geral
 ggplot(murders, aes(y = populacao, x = assassinatos)) +
   geom_point() +
   geom_smooth(method = "lm",color = "red") +
   labs(subtitle = "Gráfico de dispersão",
        y = "População", x = "Assassinatos",
-       caption = "Fonte: https://en.wikipedia.org/wiki/Gun_violence_in_the_United_States_by_state") + 
-  scale_y_continuous(labels = comma_format()) +
-  scale_x_continuous(labels = comma_format())
+       caption = "Fonte: https://en.wikipedia.org/wiki/Gun_violence_in_the_United_States_by_state")
 
-##Todas regioes
-ggplot(murders, aes(y = populacao, x = assassinatos, shape = regiao)) +
-  geom_point(aes(col=regiao), shape = 18) +
-  labs(subtitle = "Gráfico de dispersão por região",
-       y = "População", x = "Assassinatos",
-       caption = "Fonte: https://en.wikipedia.org/wiki/Gun_violence_in_the_United_States_by_state") + 
-  scale_y_continuous(labels = comma_format()) +
-  scale_x_continuous(labels = comma_format())

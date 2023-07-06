@@ -1,5 +1,8 @@
 rm(list = ls())
 
+library(ggplot2)
+library(scales)
+library(xtable)
 library(dslabs)
 data("murders")
 ?murders
@@ -14,6 +17,7 @@ citation()
 #            Estados onde foram registrados os assassinatos;
 #            Regiões as quais cada Estado pertence;
 #            População de cada Estado.
+
 
 # tipo de variável, respectivamente: Quantitativa discreta;
 #                                    Qualitativa Nominal;
@@ -42,7 +46,6 @@ f(assassinatos); f(populacao)
 g1 = boxplot(assassinatos, main = 'Boxplot: assassinatos por arma de fogo', 
         xlab = 'Número de assassinatos', horizontal = TRUE, col = 'lightgreen')
 abline(v = g1$stats, lty = 2)
-
 g1$out # Outliers do boxplot
 subset(murders, assassinatos >= 669 & assassinatos <= 1257)
 
@@ -74,6 +77,15 @@ boxplot(a, col = rainbow(4), ylab = 'número de assassinatos',
         main = 'Boxplot comparativo: assassinatos por região',
         xlab = 'Região')
 
+cores <- c("red", "blue", "green", "orange")
+ggplot(murders, aes(y = assassinatos, x = regiao)) +
+  geom_boxplot(fill = cores) +
+  scale_fill_manual(values = cores) +
+  labs(title = "Boxplot comparativo: assassinatos por região.",
+       x = "Região",
+       y = "Assassinatos", caption = "Fonte: Elaborado pelos autores.") +
+  theme_minimal()
+
 if(sum(aggregate(assassinatos~regiao, murders, var)[,2]*aggregate(assassinatos~regiao, murders, length)[,2])/sum(aggregate(assassinatos~regiao, murders, length)[,2]) > var(assassinatos)){
   print('A variável qualitativa não melhora a previsão de assassinatos')
   } else{print('A variável qualitativa melhora a previsão de assassinatos')}
@@ -87,17 +99,46 @@ abline(lm(populacao~assassinatos))
 cor(assassinatos, populacao, method = 'pearson') # Correlação direta forte
 
 
-# Gráfico de dispersão e coeficiente de correlação
-library(ggplot2)
-plot(assassinatos, populacao, main = 'Gráfico de disperção: Assassinatos X População',
-     xlab = 'Assassinatos', ylab = 'População', pch = 1)
-abline(lm(populacao~assassinatos))
-cor(assassinatos, populacao, method = 'pearson') # Correlação direta forte
-
+# Gráfico de dispersão e intervalo de confiança
 ggplot(murders, aes(y = populacao, x = assassinatos)) +
   geom_point() +
   geom_smooth(method = "lm",color = "red") +
+  labs(subtitle = "Gráfico de dispersão: Assassinatos X População",
+       y = "População", x = "Assassinatos",
+       caption = "Fonte: Elaborado pelos autores") +
+    scale_y_continuous(labels = comma_format()) +
+    scale_x_continuous(labels = comma_format())
+ggplot(murders, aes(y = populacao, x = assassinatos, shape = regiao)) +
+  geom_point(aes(col = regiao), shape = 16) +
   labs(subtitle = "Gráfico de dispersão",
        y = "População", x = "Assassinatos",
-       caption = "Fonte: https://en.wikipedia.org/wiki/Gun_violence_in_the_United_States_by_state")
+       caption = "Fonte: https://en.wikipedia.org/wiki/Gun_violence_in_the_United_States_by_state") + 
+  scale_y_continuous(labels = comma_format()) +
+  scale_x_continuous(labels = comma_format())
+
+View(murders)
+
+# Tabela mortes por região
+soma_assassinatos = aggregate(assassinatos ~ regiao, data = murders, FUN = sum)
+soma_assassinatos
+xtable(soma_assassinatos)
+
+citation(dslabs)
+
+
+
+
+
+percentual_assassinatos =  (assassinatos / populacao) * 100
+
+# Criação do dataframe com os dados
+dados <- data.frame(regiao, percentual_assassinatos)
+
+# Criação do gráfico de barras usando ggplot
+grafico <- ggplot(dados, aes(x = regiao, y = percentual_assassinatos, fill = regiao)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Região", y = "% Percentual de Assassinatos", 
+       title = "Gráfico de barras: Percentual de assassinatos por região") +
+  scale_fill_manual(values = rainbow(4)) +
+  theme_minimal()
 
